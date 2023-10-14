@@ -1,7 +1,7 @@
 use std::f32::consts::PI;
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
-use bevy_destination::destination::{Destination, DestinationBundle, DestinationPlugin, RotationSpeed, Speed};
+use bevy_destination_svn::destination::{Destination, DestinationBundle, DestinationPlugin, RotationSpeed, Speed};
 
 fn main() {
     App::new().
