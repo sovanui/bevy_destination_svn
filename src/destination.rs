@@ -31,7 +31,13 @@ pub struct DestinationBundle {
 
 impl Destination {
     pub fn new(from: Vec3, target: Vec3) -> Self {
-        Destination::Target(Target::new(from, target))
+
+        if (target - from).length() == 0.0 {
+            Destination::Reached
+        } else {
+            Destination::Target(Target::new(from, target))
+        }
+
     }
 
     pub fn pause(&mut self) {
