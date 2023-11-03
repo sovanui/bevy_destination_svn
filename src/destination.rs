@@ -1,7 +1,7 @@
 use bevy::app::App;
 use bevy::prelude::{Bundle, Component, Plugin, Query, Transform, Update, Vec3};
 use bevy_rapier3d::prelude::Velocity;
-use crate::destination_target::{Target, RotationEffect, TranslationEffect};
+use crate::target::{Target, RotationEffect, TranslationEffect};
 
 
 pub struct DestinationPlugin;
@@ -11,6 +11,7 @@ impl Plugin for DestinationPlugin {
         app.add_systems(Update, move_to_destination);
     }
 }
+
 
 
 #[derive(Component)] pub struct Speed(pub f32);
