@@ -1,43 +1,40 @@
+use crate::target::{RotationEffect, Target, TranslationEffect};
 use bevy::app::App;
-use bevy::prelude::{Bundle, Component, Plugin, Query, Transform, Update, Vec3};
+use bevy::prelude::{Bundle, Component, Plugin, PostUpdate, Query, Transform, Vec3};
 use bevy_rapier3d::prelude::Velocity;
-use crate::target::{Target, RotationEffect, TranslationEffect};
-
 
 pub struct DestinationPlugin;
 
 impl Plugin for DestinationPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, move_to_destination);
+        app.add_systems(PostUpdate, move_to_destination);
     }
 }
 
-
-
-#[derive(Component)] pub struct Speed(pub f32);
-#[derive(Component)] pub struct RotationSpeed(pub f32);
-#[derive(Component)] pub enum Destination {
+#[derive(Component)]
+pub struct Speed(pub f32);
+#[derive(Component)]
+pub struct RotationSpeed(pub f32);
+#[derive(Component)]
+pub enum Destination {
     Target(Target),
-    Reached
+    Reached,
 }
 
 #[derive(Bundle)]
 pub struct DestinationBundle {
     pub destination: Destination,
     pub speed: Speed,
-    pub rotation_speed: RotationSpeed
+    pub rotation_speed: RotationSpeed,
 }
-
 
 impl Destination {
     pub fn new(from: Vec3, target: Vec3) -> Self {
-
         if (target - from).length() == 0.0 {
             Destination::Reached
         } else {
             Destination::Target(Target::new(from, target))
         }
-
     }
 
     pub fn pause(&mut self) {
@@ -52,7 +49,6 @@ impl Destination {
         }
     }
 }
-
 
 const DEFAULT_SPEED_VALUE: f32 = 6.0;
 const DEFAULT_ROTATION_SPEED_VALUE: f32 = 18.0;
@@ -91,38 +87,50 @@ fn move_to_destination(
         &mut Velocity,
         &mut Destination,
         Option<&Speed>,
-        Option<&RotationSpeed>
-    )>
+        Option<&RotationSpeed>,
+    )>,
 ) {
+    query.for_each_mut(
+        |(mut transform, mut velocity, mut destination, speed, rotation_speed)| {
+            velocity.linvel = Vec3::ZERO;
+            velocity.angvel = Vec3::ZERO;
 
-    query.for_each_mut( | (mut transform, mut velocity, mut destination, speed, rotation_speed) | {
+            match &mut *destination {
+                Destination::Reached => {}
 
-        velocity.linvel = Vec3::ZERO;
-        velocity.angvel = Vec3::ZERO;
+                Destination::Target(target) => {
+                    let rotation_effect = target
+                        .get_rotation_effect(*transform, rotation_speed.unwrap_or_default().0);
+                    let translation_effect =
+                        target.get_translation_effect(*transform, speed.unwrap_or_default().0);
 
-        match &mut *destination {
-            Destination::Reached => {}
+                    match rotation_effect {
+                        RotationEffect::AngularVelocity(angular_velocity) => {
+                            velocity.angvel = angular_velocity
+                        }
+                        RotationEffect::FinalRotationFix(final_rotation_fix) => {
+                            transform.rotation = final_rotation_fix
+                        }
+                        RotationEffect::RotationDone => {}
+                    }
 
-            Destination::Target(target) => {
-                let rotation_effect = target.get_rotation_effect(*transform, rotation_speed.unwrap_or_default().0);
-                let translation_effect = target.get_translation_effect(*transform, speed.unwrap_or_default().0);
+                    match translation_effect {
+                        TranslationEffect::LinearVelocity(linear_velocity) => {
+                            velocity.linvel = linear_velocity
+                        }
+                        TranslationEffect::FinalTranslationFix(final_translation_fix) => {
+                            transform.translation = final_translation_fix
+                        }
+                        TranslationEffect::DestinationReached => {}
+                    }
 
-                match rotation_effect {
-                    RotationEffect::AngularVelocity(angular_velocity) => { velocity.angvel = angular_velocity }
-                    RotationEffect::FinalRotationFix(final_rotation_fix) => { transform.rotation = final_rotation_fix }
-                    RotationEffect::RotationDone => {}
-                }
-
-                match translation_effect {
-                    TranslationEffect::LinearVelocity(linear_velocity) => { velocity.linvel = linear_velocity }
-                    TranslationEffect::FinalTranslationFix(final_translation_fix) => { transform.translation = final_translation_fix }
-                    TranslationEffect::DestinationReached => {}
-                }
-
-                if let (RotationEffect::RotationDone, TranslationEffect::DestinationReached) = (rotation_effect, translation_effect) {
-                    *destination = Destination::Reached;
+                    if let (RotationEffect::RotationDone, TranslationEffect::DestinationReached) =
+                        (rotation_effect, translation_effect)
+                    {
+                        *destination = Destination::Reached;
+                    }
                 }
             }
-        }
-    });
+        },
+    );
 }
