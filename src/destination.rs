@@ -84,6 +84,7 @@ impl<'a> Default for &'a RotationSpeed {
     }
 }
 
+#[allow(clippy::type_complexity)]
 fn move_to_destination(
     mut query: Query<(
         &mut Transform,

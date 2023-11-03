@@ -105,6 +105,7 @@ impl Target {
     fn get_needed_angular_velocity(&self, transform: Transform) -> Vec3 {
         let current_direction = transform.forward();
 
+        #[allow(clippy::let_and_return)]
         let rotation_axis = current_direction.cross(self.direction).normalize();
         rotation_axis
     }
