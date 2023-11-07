@@ -26,15 +26,15 @@ fn spawn_scene(
 
     // Spawn platform
     commands.spawn(PbrBundle {
-        mesh: meshes.add(Mesh::from(shape::Plane { size: 40.0, subdivisions: 0 })),
-        material: materials.add(Color::rgb(0.3, 0.5, 0.3).into()),
+        mesh: meshes.add(Mesh::from(shape::Plane::from_size(40.0))),
+        material: materials.add(Color::GRAY.into()),
         ..default()
     });
 
     // Spawn object
     commands.spawn(PbrBundle {
-        mesh: meshes.add(Mesh::from(shape::Cube { size: 1.0 })),
-        material: materials.add(Color::rgb(0.8, 0.7, 0.6).into()),
+        mesh: meshes.add(Mesh::from(shape::Cube::new(1.0))),
+        material: materials.add(Color::BEIGE.into()),
         transform: Transform::from_xyz(0.0, 0.5, 0.0),
         ..default()
     })
