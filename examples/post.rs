@@ -1,3 +1,4 @@
+use std::f32::consts::PI;
 use bevy::prelude::*;
 
 
@@ -20,23 +21,26 @@ fn spawn_scene(
     // Spawn platform for reference
     commands.spawn(PbrBundle {
         mesh: meshes.add(Mesh::from(shape::Plane::from_size(40.0))),
-        material: materials.add(Color::GRAY.into()),
+        material: materials.add(Color::SEA_GREEN.into()),
+        ..default()
+    });
+
+
+    // Spawn Camera
+    let player_camera_y_offset: f32 = 20.0;
+    let player_camera_z_offset: f32 = 10.0;
+
+    commands.spawn(Camera3dBundle {
+        transform: Transform::from_xyz(0.0, player_camera_y_offset, player_camera_z_offset)
+            .looking_at(Vec3::ZERO, Vec3::Y),
         ..default()
     });
 
 
     // Add global light
-    commands.spawn(DirectionalLightBundle::default());
-
-    let player_camera_y_offset: f32 = 20.0;
-    let player_camera_z_offset: f32 = 10.0;
-
-
-    // Spawn Camera
-    commands.spawn(Camera3dBundle {
-        transform: Transform::from_xyz(0.0, player_camera_y_offset, player_camera_z_offset)
-            .looking_at(Vec3::ZERO, Vec3::Y),
-        ..default()
+    commands.insert_resource(AmbientLight {
+        color: Default::default(),
+        brightness: 1.0,
     });
 
 
