@@ -13,12 +13,18 @@ fn main() {
 #[derive(Component)]
 struct Cube;
 
+#[derive(Component)]
+struct Velocity {
+    pub linear: Vec3,
+    pub angular: Vec3
+}
+
+
 fn spawn_scene(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-
 
     // Spawn cube
     commands
@@ -28,7 +34,11 @@ fn spawn_scene(
             transform: Transform::from_xyz(0.0, 0.5, 0.0),
             ..default()
         })
-        .insert(Cube);
+        .insert(Cube)
+        .insert(Velocity {
+            linear: Vec3::new(3.0, 0.0, 0.0),
+            angular: Vec3::new(0.0, 90f32.to_radians(), 0.0),
+        });
 
 
     // Spawn Camera
@@ -59,9 +69,9 @@ fn spawn_scene(
 
 }
 
-fn move_cube_to_the_right_and_rotate_it(mut query: Query<&mut Transform, With<Cube>>) {
-    let mut transform = query.single_mut();
+fn move_cube_to_the_right_and_rotate_it(mut query: Query<(&mut Transform, &Velocity), With<Cube>>, time: Res<Time>) {
+    let (mut transform, velocity) = query.single_mut();
 
-    transform.translation.x += 0.05;
-    transform.rotation *= Quat::from_rotation_y(2f32.to_radians());
+    transform.translation += velocity.linear * time.delta_seconds();
+    transform.rotation *= Quat::from_scaled_axis(velocity.angular * time.delta_seconds());
 }
