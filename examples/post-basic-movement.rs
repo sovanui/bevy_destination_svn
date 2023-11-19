@@ -1,23 +1,18 @@
 use bevy::prelude::*;
+use bevy_rapier3d::prelude::*;
 
 //noinspection DuplicatedCode
 
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
+        .add_plugins(RapierPhysicsPlugin::<NoUserData>::default())
         .add_systems(Startup, spawn_scene)
-        .add_systems(Update, move_cube_to_the_right_and_rotate_it)
         .run();
 }
 
 #[derive(Component)]
 struct Cube;
-
-#[derive(Component)]
-struct Velocity {
-    pub linear: Vec3,
-    pub angular: Vec3
-}
 
 
 fn spawn_scene(
@@ -35,9 +30,10 @@ fn spawn_scene(
             ..default()
         })
         .insert(Cube)
+        .insert(RigidBody::KinematicVelocityBased)
         .insert(Velocity {
-            linear: Vec3::new(3.0, 0.0, 0.0),
-            angular: Vec3::new(0.0, 90f32.to_radians(), 0.0),
+            linvel: Vec3::new(3.0, 0.0, 0.0),
+            angvel: Vec3::new(0.0, 90f32.to_radians(), 0.0),
         });
 
 
@@ -67,11 +63,4 @@ fn spawn_scene(
         brightness: 1.0,
     });
 
-}
-
-fn move_cube_to_the_right_and_rotate_it(mut query: Query<(&mut Transform, &Velocity), With<Cube>>, time: Res<Time>) {
-    let (mut transform, velocity) = query.single_mut();
-
-    transform.translation += velocity.linear * time.delta_seconds();
-    transform.rotation *= Quat::from_scaled_axis(velocity.angular * time.delta_seconds());
 }

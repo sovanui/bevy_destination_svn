@@ -24,13 +24,6 @@ fn spawn_scene(
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
 
-    // Spawn platform
-    commands.spawn(PbrBundle {
-        mesh: meshes.add(Mesh::from(shape::Plane::from_size(40.0))),
-        material: materials.add(Color::GRAY.into()),
-        ..default()
-    });
-
     // Spawn object
     commands.spawn(PbrBundle {
         mesh: meshes.add(Mesh::from(shape::Cube::new(1.0))),
@@ -57,16 +50,18 @@ fn spawn_scene(
         ..default()
     });
 
+    // Spawn platform
+    commands.spawn(PbrBundle {
+        mesh: meshes.add(Mesh::from(shape::Plane::from_size(30.0))),
+        material: materials.add(Color::SEA_GREEN.into()),
+        ..default()
+    });
+
 
     // Add global light
-    commands.spawn(DirectionalLightBundle {
-        directional_light: DirectionalLight { illuminance: 10000.0, ..default() },
-        transform: Transform {
-            translation: Vec3::new(0.0, 2.0, 0.0),
-            rotation: Quat::from_rotation_x(-PI / 4.),
-            ..default()
-        },
-        ..default()
+    commands.insert_resource(AmbientLight {
+        color: Default::default(),
+        brightness: 1.0,
     });
 
 }
