@@ -19,6 +19,12 @@ pub enum Destination {
     Reached,
 }
 
+#[derive(Component)]
+pub struct DestinationSpeed {
+    pub translation: f32,
+    pub rotation: f32
+}
+
 fn spawn_scene(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
@@ -35,7 +41,11 @@ fn spawn_scene(
         .insert(Cube)
         .insert(RigidBody::KinematicVelocityBased)
         .insert(Velocity::default())
-        .insert(Destination::Target(Vec3::new(5.0, 0.5, 0.0)));
+        .insert(Destination::Target(Vec3::new(5.0, 0.5, 0.0)))
+        .insert(DestinationSpeed {
+            translation: 6.0,
+            rotation: 18.0,
+        });
 
     // Spawn Camera
     let player_camera_y_offset: f32 = 20.0;
@@ -66,8 +76,7 @@ fn move_to_destination(
         &mut Transform,
         &mut Velocity,
         &mut Destination,
-        Option<&Speed>,
-        Option<&RotationSpeed>,
+        Option<&DestinationSpeed>,
     )>,
 ) {
 }

@@ -11,10 +11,14 @@ impl Plugin for DestinationPlugin {
     }
 }
 
-#[derive(Component)]
-pub struct Speed(pub f32);
-#[derive(Component)]
-pub struct RotationSpeed(pub f32);
+
+#[derive(Component, Copy, Clone)]
+pub struct DestinationSpeed {
+    pub translation: f32,
+    pub rotation: f32
+}
+
+
 #[derive(Component)]
 pub enum Destination {
     Target(Target),
@@ -24,8 +28,7 @@ pub enum Destination {
 #[derive(Bundle)]
 pub struct DestinationBundle {
     pub destination: Destination,
-    pub speed: Speed,
-    pub rotation_speed: RotationSpeed,
+    pub speed: DestinationSpeed
 }
 
 impl Destination {
@@ -53,84 +56,60 @@ impl Destination {
 const DEFAULT_SPEED_VALUE: f32 = 6.0;
 const DEFAULT_ROTATION_SPEED_VALUE: f32 = 18.0;
 
-static DEFAULT_SPEED: Speed = Speed(DEFAULT_SPEED_VALUE);
-static DEFAULT_ROTATION_SPEED: RotationSpeed = RotationSpeed(DEFAULT_ROTATION_SPEED_VALUE);
+static DEFAULT_DESTINATION_SPEED: DestinationSpeed = DestinationSpeed {
+    translation: DEFAULT_SPEED_VALUE,
+    rotation: DEFAULT_ROTATION_SPEED_VALUE,
+};
 
-impl Default for Speed {
+
+impl Default for DestinationSpeed {
+    fn default() -> Self { DEFAULT_DESTINATION_SPEED }
+}
+
+impl<'a> Default for &'a DestinationSpeed {
     fn default() -> Self {
-        Self(DEFAULT_SPEED_VALUE)
+        &DEFAULT_DESTINATION_SPEED
     }
 }
 
-impl<'a> Default for &'a Speed {
-    fn default() -> Self {
-        &DEFAULT_SPEED
-    }
-}
-
-impl Default for RotationSpeed {
-    fn default() -> Self {
-        Self(DEFAULT_ROTATION_SPEED_VALUE)
-    }
-}
-
-impl<'a> Default for &'a RotationSpeed {
-    fn default() -> Self {
-        &DEFAULT_ROTATION_SPEED
-    }
-}
 
 #[allow(clippy::type_complexity)]
+#[rustfmt::skip]
 fn move_to_destination(
     mut query: Query<(
         &mut Transform,
         &mut Velocity,
         &mut Destination,
-        Option<&Speed>,
-        Option<&RotationSpeed>,
+        Option<&DestinationSpeed>,
     )>,
 ) {
-    query.for_each_mut(
-        |(mut transform, mut velocity, mut destination, speed, rotation_speed)| {
-            velocity.linvel = Vec3::ZERO;
-            velocity.angvel = Vec3::ZERO;
+    query.for_each_mut(|(mut transform, mut velocity, mut destination, destination_speed)| {
+        velocity.linvel = Vec3::ZERO;
+        velocity.angvel = Vec3::ZERO;
 
-            match &mut *destination {
-                Destination::Reached => {}
+        match &mut *destination {
+            Destination::Reached => {}
 
-                Destination::Target(target) => {
-                    let rotation_effect = target
-                        .get_rotation_effect(*transform, rotation_speed.unwrap_or_default().0);
-                    let translation_effect =
-                        target.get_translation_effect(*transform, speed.unwrap_or_default().0);
+            Destination::Target(target) => {
+                let rotation_effect = target.get_rotation_effect(*transform, destination_speed.unwrap_or_default().rotation);
+                let translation_effect = target.get_translation_effect(*transform, destination_speed.unwrap_or_default().translation);
 
-                    match rotation_effect {
-                        RotationEffect::AngularVelocity(angular_velocity) => {
-                            velocity.angvel = angular_velocity
-                        }
-                        RotationEffect::FinalRotationFix(final_rotation_fix) => {
-                            transform.rotation = final_rotation_fix
-                        }
-                        RotationEffect::RotationDone => {}
-                    }
+                match rotation_effect {
+                    RotationEffect::AngularVelocity(angular_velocity) => { velocity.angvel = angular_velocity }
+                    RotationEffect::FinalRotationFix(final_rotation_fix) => { transform.rotation = final_rotation_fix }
+                    RotationEffect::RotationDone => {}
+                }
 
-                    match translation_effect {
-                        TranslationEffect::LinearVelocity(linear_velocity) => {
-                            velocity.linvel = linear_velocity
-                        }
-                        TranslationEffect::FinalTranslationFix(final_translation_fix) => {
-                            transform.translation = final_translation_fix
-                        }
-                        TranslationEffect::DestinationReached => {}
-                    }
+                match translation_effect {
+                    TranslationEffect::LinearVelocity(linear_velocity) => { velocity.linvel = linear_velocity }
+                    TranslationEffect::FinalTranslationFix(final_translation_fix) => { transform.translation = final_translation_fix }
+                    TranslationEffect::DestinationReached => {}
+                }
 
-                    if let (RotationEffect::RotationDone, TranslationEffect::DestinationReached) =
-                        (rotation_effect, translation_effect)
-                    {
-                        *destination = Destination::Reached;
-                    }
+                if let (RotationEffect::RotationDone, TranslationEffect::DestinationReached) = (rotation_effect, translation_effect) {
+                    *destination = Destination::Reached;
                 }
             }
-        },
-    );
+        }
+    });
 }

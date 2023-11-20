@@ -1,7 +1,7 @@
 use std::f32::consts::PI;
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
-use bevy_destination_svn::destination::{Destination, DestinationBundle, DestinationPlugin, RotationSpeed, Speed};
+use bevy_destination_svn::destination::{Destination, DestinationBundle, DestinationPlugin, DestinationSpeed};
 
 fn main() {
     App::new().
@@ -35,8 +35,7 @@ fn spawn_scene(
         .insert(Velocity::default())
         .insert(DestinationBundle {
             destination: Destination::Reached,
-            speed: Speed::default(),
-            rotation_speed: RotationSpeed::default()
+            speed: DestinationSpeed::default(),
         });
 
 
@@ -96,30 +95,30 @@ fn set_next_destination(
 
 fn update_speed(
     keyboard_inputs: Res<Input<KeyCode>>,
-    mut query: Query<&mut Speed>
+    mut query: Query<&mut DestinationSpeed>
 ) {
     query.for_each_mut(|mut speed| {
         if keyboard_inputs.just_pressed(KeyCode::Up) {
-            speed.0 += 1.0;
+            speed.translation += 1.0;
         }
 
         if keyboard_inputs.just_pressed(KeyCode::Down) {
-            speed.0 -= 1.0;
+            speed.translation -= 1.0;
         }
     });
 }
 
 fn update_rotation_speed(
     keyboard_inputs: Res<Input<KeyCode>>,
-    mut query: Query<&mut RotationSpeed>
+    mut query: Query<&mut DestinationSpeed>
 ) {
     query.for_each_mut(|mut rotation_speed| {
         if keyboard_inputs.just_pressed(KeyCode::Right) {
-            rotation_speed.0 += 2.0;
+            rotation_speed.rotation += 2.0;
         }
 
         if keyboard_inputs.just_pressed(KeyCode::Left) {
-            rotation_speed.0 -= 2.0;
+            rotation_speed.rotation -= 2.0;
         }
     });
 }
