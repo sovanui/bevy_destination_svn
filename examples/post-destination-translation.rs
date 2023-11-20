@@ -1,13 +1,12 @@
-
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
-
 
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
         .add_plugins(RapierPhysicsPlugin::<NoUserData>::default())
         .add_systems(Startup, spawn_scene)
+        .add_systems(Update, move_to_destination)
         .run();
 }
 
@@ -25,7 +24,6 @@ fn spawn_scene(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-
     // Spawn cube
     commands
         .spawn(PbrBundle {
@@ -39,7 +37,6 @@ fn spawn_scene(
         .insert(Velocity::default())
         .insert(Destination::Target(Vec3::new(5.0, 0.5, 0.0)));
 
-
     // Spawn Camera
     let player_camera_y_offset: f32 = 20.0;
     let player_camera_z_offset: f32 = 10.0;
@@ -50,8 +47,6 @@ fn spawn_scene(
         ..default()
     });
 
-
-
     // Spawn platform for reference
     commands.spawn(PbrBundle {
         mesh: meshes.add(Mesh::from(shape::Plane::from_size(15.0))),
@@ -59,11 +54,20 @@ fn spawn_scene(
         ..default()
     });
 
-
     // Add global light
     commands.insert_resource(AmbientLight {
         color: Default::default(),
         brightness: 1.0,
     });
+}
 
+fn move_to_destination(
+    mut query: Query<(
+        &mut Transform,
+        &mut Velocity,
+        &mut Destination,
+        Option<&Speed>,
+        Option<&RotationSpeed>,
+    )>,
+) {
 }
