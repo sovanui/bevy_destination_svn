@@ -71,12 +71,25 @@ fn spawn_scene(
     });
 }
 
+#[rustfmt::skip]
 fn move_to_destination(
     mut query: Query<(
         &mut Transform,
         &mut Velocity,
         &mut Destination,
-        Option<&DestinationSpeed>,
+        &DestinationSpeed
     )>,
 ) {
+    query.for_each_mut(|(mut transform, mut velocity, mut destination, destination_speed)| {
+        if let Destination::Target(target) = *destination {
+            let direction = (transform.translation - target);
+
+            if direction.length() == 0.0 {
+                *destination = Destination::Reached;
+                return;
+            }
+
+            let direction = direction.normalize();
+        }
+    });
 }
