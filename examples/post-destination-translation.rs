@@ -82,14 +82,14 @@ fn move_to_destination(
 ) {
     query.for_each_mut(|(mut transform, mut velocity, mut destination, destination_speed)| {
         if let Destination::Target(target) = *destination {
-            let direction = (transform.translation - target);
+            let direction = target - transform.translation;
 
             if direction.length() == 0.0 {
                 *destination = Destination::Reached;
                 return;
             }
 
-            let direction = direction.normalize();
+            velocity.linvel = direction.normalize() * destination_speed.translation;
         }
     });
 }
