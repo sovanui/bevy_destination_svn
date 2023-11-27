@@ -82,13 +82,16 @@ fn move_to_destination(
 ) {
     query.for_each_mut(|(mut transform, mut velocity, mut destination, destination_speed)| {
         if let Destination::Target(target) = *destination {
-            let direction = target - transform.translation;
 
-            if direction.length() == 0.0 {
+            const REACHED_THRESHOLD: f32 = 0.05;
+
+            if transform.translation.distance(target) < REACHED_THRESHOLD {
                 *destination = Destination::Reached;
+                velocity.linvel = Vec3::ZERO;
                 return;
             }
 
+            let direction = target - transform.translation;
             velocity.linvel = direction.normalize() * destination_speed.translation;
         }
     });
