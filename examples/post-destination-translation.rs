@@ -88,6 +88,7 @@ fn move_to_destination(
             if transform.translation.distance(target) < REACHED_THRESHOLD {
                 *destination = Destination::Reached;
                 velocity.linvel = Vec3::ZERO;
+                transform.translation = target;
                 return;
             }
 
