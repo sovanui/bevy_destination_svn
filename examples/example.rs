@@ -18,25 +18,43 @@ fn main() {
 }
 
 
+#[derive(Component)]
+struct DestinationMarker;
+
+
 fn spawn_scene(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
 
+    let starting_point = Vec3::new(0.0, 0.5, 0.0);
+    let first_destination = Vec3::new(5.0, 0.5, 5.0);
+
     // Spawn object
     commands.spawn(PbrBundle {
         mesh: meshes.add(Mesh::from(shape::Cube::new(1.0))),
         material: materials.add(Color::BEIGE.into()),
-        transform: Transform::from_xyz(0.0, 0.5, 0.0),
+        transform: Transform::from_translation(starting_point),
         ..default()
     })
         .insert(RigidBody::KinematicVelocityBased)
         .insert(Velocity::default())
         .insert(DestinationBundle {
-            destination: Destination::Reached,
+            destination: Destination::new(starting_point, first_destination),
             speed: DestinationSpeed::default(),
         });
+
+    // Spawn destination marker
+    commands.spawn( PbrBundle {
+        mesh: meshes.add(Mesh::from(shape::UVSphere {
+            radius: 0.40,
+            ..default()
+        })),
+        material: materials.add(Color::RED.into()),
+        transform: Transform::from_translation(first_destination),
+        ..default()
+    }).insert(DestinationMarker);
 
 
     let player_camera_y_offset: f32 = 20.0;
@@ -67,7 +85,9 @@ fn spawn_scene(
 
 fn set_next_destination(
     mut query: Query<(&mut Destination, &Transform)>,
+    mut destination_marker: Query<&mut Transform, (With<DestinationMarker>, Without<Destination>)>
 ) {
+
 
     query.for_each_mut(|(mut destination, transform)| {
         match &mut *destination {
@@ -76,16 +96,26 @@ fn set_next_destination(
 
             // set new destination when reached previous
             Destination::Reached => {
+
+                let next_destination = Vec3::new(
+                    rand::random::<f32>() * 20.0 - 10.0,
+                    0.5,
+                    rand::random::<f32>() * 20.0 - 10.0
+                );
+
                 *destination = Destination::new(
                     // from
                     transform.translation,
                     // to
                     Vec3::new(
-                            rand::random::<f32>() * 20.0 - 10.0,
-                            0.5,
-                            rand::random::<f32>() * 20.0 - 10.0
-                        )
+                        rand::random::<f32>() * 20.0 - 10.0,
+                        0.5,
+                        rand::random::<f32>() * 20.0 - 10.0
+                    )
                 );
+
+                let mut marker_transform = destination_marker.single_mut();
+                marker_transform.translation = next_destination;
             }
         }
     });
