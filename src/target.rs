@@ -32,23 +32,16 @@ pub enum TranslationEffect {
 impl Target {
     pub fn new(from: Vec3, target: Vec3) -> Self {
         if (target - from).length() == 0.0 {
-            Self {
-                target,
-                direction: Vec3::default(),
-                last_distance_to_target: 0.0,
-                status: Status::OnGoing,
-                rotation_done: true,
-                destination_reached: true,
-            }
-        } else {
-            Self {
-                target,
-                direction: (target - from).normalize(),
-                last_distance_to_target: from.distance(target),
-                status: Status::OnGoing,
-                rotation_done: false,
-                destination_reached: false,
-            }
+            panic!("Target of length 0");
+        }
+
+        Self {
+            target,
+            direction: (target - from).normalize(),
+            last_distance_to_target: from.distance(target),
+            status: Status::OnGoing,
+            rotation_done: false,
+            destination_reached: false,
         }
     }
 
