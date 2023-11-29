@@ -103,16 +103,7 @@ fn set_next_destination(
                     rand::random::<f32>() * 20.0 - 10.0
                 );
 
-                *destination = Destination::new(
-                    // from
-                    transform.translation,
-                    // to
-                    Vec3::new(
-                        rand::random::<f32>() * 20.0 - 10.0,
-                        0.5,
-                        rand::random::<f32>() * 20.0 - 10.0
-                    )
-                );
+                *destination = Destination::new(transform.translation, next_destination);
 
                 let mut marker_transform = destination_marker.single_mut();
                 marker_transform.translation = next_destination;
