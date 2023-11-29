@@ -1,18 +1,15 @@
 use bevy::prelude::{Quat, Transform, Vec3};
 
-pub enum Status {
-    OnGoing,
-    Paused,
+struct TargetState {
+    last_remaining_distance: f32,
+    rotation_done: bool,
+    translation_done: bool,
 }
 
 pub struct Target {
     target: Vec3,
-    origin: Vec3,
     direction: Vec3,
-    total_distance: f32,
-    status: Status,
-    rotation_done: bool,
-    destination_reached: bool,
+    state: TargetState
 }
 
 const LINEAR_THRESHOLD_RATIO: f32 = 120.0;
@@ -31,32 +28,25 @@ pub enum TranslationEffect {
 }
 
 impl Target {
-    pub fn new(from: Vec3, target: Vec3) -> Self {
-        if (target - from).length() == 0.0 {
+    pub fn new(origin: Vec3, target: Vec3) -> Self {
+        if (target - origin).length() == 0.0 {
             panic!("Target of length 0");
         }
 
         Self {
             target,
-            origin: from,
-            direction: (target - from).normalize(),
-            total_distance: from.distance(target),
-            status: Status::OnGoing,
-            rotation_done: false,
-            destination_reached: false,
+            direction: (target - origin).normalize(),
+            state: TargetState {
+                last_remaining_distance: origin.distance(target),
+                rotation_done: false,
+                translation_done: false,
+            }
         }
     }
 
-    pub fn pause(&mut self) {
-        self.status = Status::Paused;
-    }
 
-    pub fn resume(&mut self) {
-        self.status = Status::OnGoing;
-    }
-
-    pub fn set_destination_reached(&mut self) {
-        self.destination_reached = true;
+    pub fn set_translation_done(&mut self) {
+        self.state.translation_done = true;
     }
 
     pub fn get_rotation_effect(
@@ -64,12 +54,12 @@ impl Target {
         transform: Transform,
         rotation_speed: f32,
     ) -> RotationEffect {
-        if self.rotation_done {
+        if self.state.rotation_done {
             return RotationEffect::RotationDone;
         }
 
         if self.is_in_facing_threshold(transform, rotation_speed) {
-            self.rotation_done = true;
+            self.state.rotation_done = true;
             return RotationEffect::FinalRotationFix(
                 transform.looking_to(self.direction, Vec3::Y).rotation,
             );
@@ -85,12 +75,12 @@ impl Target {
         transform: Transform,
         speed: f32,
     ) -> TranslationEffect {
-        if self.destination_reached {
+        if self.state.translation_done {
             return TranslationEffect::DestinationReached;
         }
 
         if self.has_reached_destination(transform, speed) {
-            self.destination_reached = true;
+            self.state.translation_done = true;
             return TranslationEffect::FinalTranslationFix(self.target);
         }
 
@@ -98,10 +88,15 @@ impl Target {
     }
 
     fn has_reached_destination(&mut self, transform: Transform, speed: f32) -> bool {
-        let distance_from_origin = transform.translation.distance(self.origin);
-        let destination_reached_threshold = speed / LINEAR_THRESHOLD_RATIO;
-        let threshold_distance = self.total_distance - destination_reached_threshold;
-        distance_from_origin > threshold_distance
+
+        let remaining_distance_reached_threshold = speed / LINEAR_THRESHOLD_RATIO;
+
+        let remaining_distance = transform.translation.distance(self.target);
+
+        let has_reached_destination = remaining_distance <= remaining_distance_reached_threshold;
+        let has_gone_past_destination = remaining_distance > self.state.last_remaining_distance;
+
+        has_reached_destination || has_gone_past_destination
     }
 
     fn is_in_facing_threshold(&self, transform: Transform, rotation_speed: f32) -> bool {

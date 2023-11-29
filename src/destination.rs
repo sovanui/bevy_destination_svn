@@ -39,18 +39,6 @@ impl Destination {
             Destination::Target(Target::new(from, target))
         }
     }
-
-    pub fn pause(&mut self) {
-        if let Destination::Target(target) = self {
-            target.pause();
-        }
-    }
-
-    pub fn resume(&mut self) {
-        if let Destination::Target(target) = self {
-            target.resume();
-        }
-    }
 }
 
 const DEFAULT_SPEED_VALUE: f32 = 6.0;
