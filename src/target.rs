@@ -92,9 +92,11 @@ impl Target {
         let remaining_distance_reached_threshold = speed / LINEAR_THRESHOLD_RATIO;
 
         let remaining_distance = transform.translation.distance(self.target);
+        let last_remaining_distance = self.state.last_remaining_distance;
+        self.state.last_remaining_distance = remaining_distance;
 
         let has_reached_destination = remaining_distance <= remaining_distance_reached_threshold;
-        let has_gone_past_destination = remaining_distance > self.state.last_remaining_distance;
+        let has_gone_past_destination = remaining_distance > last_remaining_distance;
 
         has_reached_destination || has_gone_past_destination
     }
