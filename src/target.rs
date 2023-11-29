@@ -9,7 +9,7 @@ struct TargetState {
 pub struct Target {
     target: Vec3,
     direction: Vec3,
-    state: TargetState
+    state: TargetState,
 }
 
 const LINEAR_THRESHOLD_RATIO: f32 = 120.0;
@@ -40,10 +40,9 @@ impl Target {
                 last_remaining_distance: origin.distance(target),
                 rotation_done: false,
                 translation_done: false,
-            }
+            },
         }
     }
-
 
     pub fn set_translation_done(&mut self) {
         self.state.translation_done = true;
@@ -88,7 +87,6 @@ impl Target {
     }
 
     fn has_reached_destination(&mut self, transform: Transform, speed: f32) -> bool {
-
         let remaining_distance_reached_threshold = speed / LINEAR_THRESHOLD_RATIO;
 
         let remaining_distance = transform.translation.distance(self.target);

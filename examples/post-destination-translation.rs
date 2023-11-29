@@ -13,16 +13,21 @@ fn main() {
 #[derive(Component)]
 struct Cube;
 
+struct Target {
+    target: Vec3,
+    last_remaining_distance: f32,
+}
+
 #[derive(Component)]
 pub enum Destination {
-    Target(Vec3),
+    Target(Target),
     Reached,
 }
 
 #[derive(Component)]
 pub struct DestinationSpeed {
     pub translation: f32,
-    pub rotation: f32
+    pub rotation: f32,
 }
 
 fn spawn_scene(
