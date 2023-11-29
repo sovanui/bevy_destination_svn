@@ -106,7 +106,10 @@ fn move_to_destination(
                     TranslationEffect::DestinationReached => {}
                 }
 
-                if let (RotationEffect::RotationDone, TranslationEffect::DestinationReached) = (rotation_effect, translation_effect) {
+                if let
+                    (RotationEffect::RotationDone, TranslationEffect::DestinationReached) =
+                    (rotation_effect, translation_effect)
+                {
                     *destination = Destination::Reached;
                 }
             }

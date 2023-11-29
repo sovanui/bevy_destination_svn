@@ -7,8 +7,9 @@ pub enum Status {
 
 pub struct Target {
     target: Vec3,
+    origin: Vec3,
     direction: Vec3,
-    last_distance_to_target: f32,
+    total_distance: f32,
     status: Status,
     rotation_done: bool,
     destination_reached: bool,
@@ -37,8 +38,9 @@ impl Target {
 
         Self {
             target,
+            origin: from,
             direction: (target - from).normalize(),
-            last_distance_to_target: from.distance(target),
+            total_distance: from.distance(target),
             status: Status::OnGoing,
             rotation_done: false,
             destination_reached: false,
@@ -96,23 +98,16 @@ impl Target {
     }
 
     fn has_reached_destination(&mut self, transform: Transform, speed: f32) -> bool {
-        let current_distance_to_target = transform.translation.distance(self.target);
-
+        let distance_from_origin = transform.translation.distance(self.origin);
         let destination_reached_threshold = speed / LINEAR_THRESHOLD_RATIO;
-        let has_reached_destination = current_distance_to_target < destination_reached_threshold;
-
-        let has_gone_past_destination = current_distance_to_target > self.last_distance_to_target;
-        self.last_distance_to_target = current_distance_to_target;
-
-        has_reached_destination || has_gone_past_destination
+        let threshold_distance = self.total_distance - destination_reached_threshold;
+        distance_from_origin > threshold_distance
     }
 
     fn is_in_facing_threshold(&self, transform: Transform, rotation_speed: f32) -> bool {
         let current_direction = transform.forward();
         let angle_between = current_direction.angle_between(self.direction);
-
         let angle_between_threshold = rotation_speed / ANGULAR_THRESHOLD_RATIO;
-
         angle_between <= angle_between_threshold
     }
 
