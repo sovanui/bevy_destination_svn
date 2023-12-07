@@ -6,14 +6,15 @@ struct TargetState {
     translation_done: bool,
 }
 
+
 pub struct Target {
     target: Vec3,
     direction: Vec3,
     state: TargetState,
 }
 
-const LINEAR_THRESHOLD_RATIO: f32 = 120.0;
-const ANGULAR_THRESHOLD_RATIO: f32 = 60.0;
+const LINEAR_THRESHOLD_RATIO: f32 = 1.0 / 120.0;
+const ANGULAR_THRESHOLD_RATIO: f32 = 1.0 / 60.0;
 
 pub enum RotationEffect {
     AngularVelocity(Vec3),
@@ -87,7 +88,7 @@ impl Target {
     }
 
     fn has_reached_destination(&mut self, transform: Transform, speed: f32) -> bool {
-        let remaining_distance_reached_threshold = speed / LINEAR_THRESHOLD_RATIO;
+        let remaining_distance_reached_threshold = speed * LINEAR_THRESHOLD_RATIO;
 
         let remaining_distance = transform.translation.distance(self.target);
         let last_remaining_distance = self.state.last_remaining_distance;
@@ -102,7 +103,7 @@ impl Target {
     fn is_in_facing_threshold(&self, transform: Transform, rotation_speed: f32) -> bool {
         let current_direction = transform.forward();
         let angle_between = current_direction.angle_between(self.direction);
-        let angle_between_threshold = rotation_speed / ANGULAR_THRESHOLD_RATIO;
+        let angle_between_threshold = rotation_speed * ANGULAR_THRESHOLD_RATIO;
         angle_between <= angle_between_threshold
     }
 
