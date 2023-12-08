@@ -79,7 +79,7 @@ fn spawn_scene(
         .insert(Destination::new(cube_start_point, Vec3::new(5.0, 0.5, 0.0)))
         .insert(DestinationSpeed {
             translation: 6.0,
-            rotation: 4.0,
+            rotation: 3.5,
         });
 
     // Spawn Camera
@@ -160,6 +160,7 @@ fn move_to_destination(
             }
 
 
+            // Check if destination reached
             if translation_reached && rotation_reached {
                 *destination = Destination::Reached;
             }
