@@ -14,6 +14,7 @@ fn main() {
         .add_systems(Update, set_next_destination)
         .add_systems(Update, update_speed)
         .add_systems(Update, update_rotation_speed)
+        .add_systems(Update, update_time_speed)
         .run();
 }
 
@@ -119,13 +120,8 @@ fn update_speed(
     mut query: Query<&mut DestinationSpeed>
 ) {
     query.for_each_mut(|mut speed| {
-        if keyboard_inputs.just_pressed(KeyCode::Up) {
-            speed.translation += 1.0;
-        }
-
-        if keyboard_inputs.just_pressed(KeyCode::Down) {
-            speed.translation -= 1.0;
-        }
+        if keyboard_inputs.just_pressed(KeyCode::Up) { speed.translation += 1.0; }
+        if keyboard_inputs.just_pressed(KeyCode::Down) { speed.translation -= 1.0; }
     });
 }
 
@@ -134,12 +130,21 @@ fn update_rotation_speed(
     mut query: Query<&mut DestinationSpeed>
 ) {
     query.for_each_mut(|mut rotation_speed| {
-        if keyboard_inputs.just_pressed(KeyCode::Right) {
-            rotation_speed.rotation += 2.0;
-        }
-
-        if keyboard_inputs.just_pressed(KeyCode::Left) {
-            rotation_speed.rotation -= 2.0;
-        }
+        if keyboard_inputs.just_pressed(KeyCode::Right) { rotation_speed.rotation += 2.0; }
+        if keyboard_inputs.just_pressed(KeyCode::Left) { rotation_speed.rotation -= 2.0; }
     });
+}
+
+fn update_time_speed(
+    keyboard_inputs: Res<Input<KeyCode>>,
+    mut time: ResMut<Time<Virtual>>
+) {
+    if keyboard_inputs.just_pressed(KeyCode::G) {
+        let new_speed = time.relative_speed() - 0.2;
+        time.set_relative_speed(new_speed);
+    }
+    if keyboard_inputs.just_pressed(KeyCode::H) {
+        let new_speed = time.relative_speed() + 0.2;
+        time.set_relative_speed(new_speed);
+    }
 }

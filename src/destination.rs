@@ -83,7 +83,7 @@ fn move_to_destination(
                 let translation_effect = target.get_translation_effect(*transform, destination_speed.unwrap_or_default().translation);
 
                 match rotation_effect {
-                    RotationEffect::AngularVelocity(angular_velocity) => { velocity.angvel = angular_velocity }
+                    RotationEffect::AngularVelocity(angular_velocity) => {velocity.angvel = angular_velocity }
                     RotationEffect::FinalRotationFix(final_rotation_fix) => { transform.rotation = final_rotation_fix }
                     RotationEffect::RotationDone => {}
                 }

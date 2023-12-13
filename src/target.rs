@@ -61,7 +61,7 @@ impl Target {
         if self.is_in_facing_threshold(transform, rotation_speed) {
             self.state.rotation_done = true;
             return RotationEffect::FinalRotationFix(
-                transform.looking_to(self.direction, Vec3::Y).rotation,
+                transform.looking_to(self.direction, Vec3::Y).rotation
             );
         }
 
