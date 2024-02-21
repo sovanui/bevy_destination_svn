@@ -1,4 +1,3 @@
-use std::f32::consts::PI;
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 use bevy_destination_svn::destination::{Destination, DestinationBundle, DestinationPlugin, DestinationSpeed};
@@ -34,8 +33,8 @@ fn spawn_scene(
 
     // Spawn object
     commands.spawn(PbrBundle {
-        mesh: meshes.add(Mesh::from(shape::Cube::new(1.0))),
-        material: materials.add(Color::BEIGE.into()),
+        mesh: meshes.add(Cuboid::new(1.0, 1.0, 1.0)),
+        material: materials.add(Color::BEIGE),
         transform: Transform::from_translation(starting_point),
         ..default()
     })
@@ -48,17 +47,14 @@ fn spawn_scene(
 
     // Spawn destination marker
     commands.spawn( PbrBundle {
-        mesh: meshes.add(Mesh::from(shape::UVSphere {
-            radius: 0.40,
-            ..default()
-        })),
-        material: materials.add(Color::RED.into()),
+        mesh: meshes.add(Sphere::new(0.4).mesh().ico(5).unwrap()),
+        material: materials.add(Color::RED),
         transform: Transform::from_translation(first_destination),
         ..default()
     }).insert(DestinationMarker);
 
 
-    let player_camera_y_offset: f32 = 20.0;
+    let player_camera_y_offset: f32 = 25.0;
     let player_camera_z_offset: f32 = 10.0;
 
     // Spawn Camera
@@ -70,8 +66,8 @@ fn spawn_scene(
 
     // Spawn platform
     commands.spawn(PbrBundle {
-        mesh: meshes.add(Mesh::from(shape::Plane::from_size(30.0))),
-        material: materials.add(Color::SEA_GREEN.into()),
+        mesh: meshes.add(Plane3d::default().mesh().size(30.0, 30.0)),
+        material: materials.add(Color::SEA_GREEN),
         ..default()
     });
 
@@ -79,7 +75,7 @@ fn spawn_scene(
     // Add global light
     commands.insert_resource(AmbientLight {
         color: Default::default(),
-        brightness: 1.0,
+        brightness: 1000.0,
     });
 
 }
@@ -90,7 +86,7 @@ fn set_next_destination(
 ) {
 
 
-    query.for_each_mut(|(mut destination, transform)| {
+    query.iter_mut().for_each(|(mut destination, transform)| {
         match &mut *destination {
 
             Destination::Target(_) => {}
@@ -116,34 +112,34 @@ fn set_next_destination(
 
 
 fn update_speed(
-    keyboard_inputs: Res<Input<KeyCode>>,
+    keyboard_inputs: Res<ButtonInput<KeyCode>>,
     mut query: Query<&mut DestinationSpeed>
 ) {
-    query.for_each_mut(|mut speed| {
-        if keyboard_inputs.just_pressed(KeyCode::Up) { speed.translation += 1.0; }
-        if keyboard_inputs.just_pressed(KeyCode::Down) { speed.translation -= 1.0; }
+    query.iter_mut().for_each(|mut speed| {
+        if keyboard_inputs.just_pressed(KeyCode::ArrowUp) { speed.translation += 1.0; }
+        if keyboard_inputs.just_pressed(KeyCode::ArrowDown) { speed.translation -= 1.0; }
     });
 }
 
 fn update_rotation_speed(
-    keyboard_inputs: Res<Input<KeyCode>>,
+    keyboard_inputs: Res<ButtonInput<KeyCode>>,
     mut query: Query<&mut DestinationSpeed>
 ) {
-    query.for_each_mut(|mut rotation_speed| {
-        if keyboard_inputs.just_pressed(KeyCode::Right) { rotation_speed.rotation += 2.0; }
-        if keyboard_inputs.just_pressed(KeyCode::Left) { rotation_speed.rotation -= 2.0; }
+    query.iter_mut().for_each(|mut rotation_speed| {
+        if keyboard_inputs.just_pressed(KeyCode::ArrowRight) { rotation_speed.rotation += 2.0; }
+        if keyboard_inputs.just_pressed(KeyCode::ArrowLeft) { rotation_speed.rotation -= 2.0; }
     });
 }
 
 fn update_time_speed(
-    keyboard_inputs: Res<Input<KeyCode>>,
+    keyboard_inputs: Res<ButtonInput<KeyCode>>,
     mut time: ResMut<Time<Virtual>>
 ) {
-    if keyboard_inputs.just_pressed(KeyCode::G) {
+    if keyboard_inputs.just_pressed(KeyCode::KeyG) {
         let new_speed = time.relative_speed() - 0.2;
         time.set_relative_speed(new_speed);
     }
-    if keyboard_inputs.just_pressed(KeyCode::H) {
+    if keyboard_inputs.just_pressed(KeyCode::KeyH) {
         let new_speed = time.relative_speed() + 0.2;
         time.set_relative_speed(new_speed);
     }

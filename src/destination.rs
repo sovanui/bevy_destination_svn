@@ -71,7 +71,7 @@ fn move_to_destination(
         Option<&DestinationSpeed>,
     )>,
 ) {
-    query.for_each_mut(|(mut transform, mut velocity, mut destination, destination_speed)| {
+    query.iter_mut().for_each(|(mut transform, mut velocity, mut destination, destination_speed)| {
         velocity.linvel = Vec3::ZERO;
         velocity.angvel = Vec3::ZERO;
 
