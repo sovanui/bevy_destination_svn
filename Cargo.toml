@@ -1,12 +1,12 @@
 [package]
 name = "bevy_destination_svn"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 
 
 [dependencies]
-bevy = "0.13.0"
-bevy_rapier3d = "0.25.0"
+bevy = "0.14.0"
+bevy_rapier3d = "0.27.0"
 rand = "0.8.5"
 
 [profile.dev.package."*"]
