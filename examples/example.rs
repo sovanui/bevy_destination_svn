@@ -2,9 +2,7 @@ use bevy::{
     color::palettes::css::{BEIGE, RED, SEA_GREEN},
     prelude::*,
 };
-use bevy_destination_svn::destination::{
-    Destination, DestinationBundle, DestinationPlugin, DestinationSpeed,
-};
+use bevy_destination_svn::destination::{Destination, DestinationPlugin, DestinationSpeed};
 use bevy_rapier3d::prelude::*;
 
 fn main() {
@@ -35,45 +33,39 @@ fn spawn_scene(
 
     // Spawn object
     commands
-        .spawn(PbrBundle {
-            mesh: meshes.add(Cuboid::new(1.0, 1.0, 1.0)),
-            material: materials.add(Color::Srgba(BEIGE)),
-            transform: Transform::from_translation(starting_point),
-            ..default()
-        })
+        .spawn((
+            Mesh3d(meshes.add(Cuboid::new(1.0, 1.0, 1.0))),
+            MeshMaterial3d(materials.add(Color::Srgba(BEIGE))),
+            Transform::from_translation(starting_point),
+        ))
         .insert(RigidBody::KinematicVelocityBased)
         .insert(Velocity::default())
-        .insert(DestinationBundle {
-            destination: Destination::new(starting_point, first_destination),
-            speed: DestinationSpeed::default(),
-        });
+        .insert(Destination::new(starting_point, first_destination));
 
     // Spawn destination marker
     commands
-        .spawn(PbrBundle {
-            mesh: meshes.add(Sphere::new(0.4).mesh().ico(5).unwrap()),
-            material: materials.add(Color::Srgba(RED)),
-            transform: Transform::from_translation(first_destination),
-            ..default()
-        })
+        .spawn((
+            Mesh3d(meshes.add(Sphere::new(0.4).mesh().ico(5).unwrap())),
+            MeshMaterial3d(materials.add(Color::Srgba(RED))),
+            Transform::from_translation(first_destination),
+        ))
         .insert(DestinationMarker);
 
     let player_camera_y_offset: f32 = 25.0;
     let player_camera_z_offset: f32 = 10.0;
 
     // Spawn Camera
-    commands.spawn(Camera3dBundle {
-        transform: Transform::from_xyz(0.0, player_camera_y_offset, player_camera_z_offset)
+    commands.spawn((
+        Camera3d::default(),
+        Transform::from_xyz(0.0, player_camera_y_offset, player_camera_z_offset)
             .looking_at(Vec3::ZERO, Vec3::Y),
-        ..default()
-    });
+    ));
 
     // Spawn platform
-    commands.spawn(PbrBundle {
-        mesh: meshes.add(Plane3d::default().mesh().size(30.0, 30.0)),
-        material: materials.add(Color::Srgba(SEA_GREEN)),
-        ..default()
-    });
+    commands.spawn((
+        Mesh3d(meshes.add(Plane3d::default().mesh().size(30.0, 30.0))),
+        MeshMaterial3d(materials.add(Color::Srgba(SEA_GREEN))),
+    ));
 
     // Add global light
     commands.insert_resource(AmbientLight {

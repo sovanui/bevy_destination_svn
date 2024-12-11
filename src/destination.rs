@@ -1,6 +1,6 @@
 use crate::target::{RotationEffect, Target, TranslationEffect};
 use bevy::app::App;
-use bevy::prelude::{Bundle, Component, Plugin, PostUpdate, Query, Transform, Vec3};
+use bevy::prelude::{Component, Plugin, PostUpdate, Query, Transform, Vec3};
 use bevy_rapier3d::prelude::Velocity;
 
 pub struct DestinationPlugin;
@@ -11,24 +11,17 @@ impl Plugin for DestinationPlugin {
     }
 }
 
-
 #[derive(Component, Copy, Clone)]
 pub struct DestinationSpeed {
     pub translation: f32,
-    pub rotation: f32
+    pub rotation: f32,
 }
 
-
 #[derive(Component)]
+#[require(DestinationSpeed)]
 pub enum Destination {
     Target(Target),
     Reached,
-}
-
-#[derive(Bundle)]
-pub struct DestinationBundle {
-    pub destination: Destination,
-    pub speed: DestinationSpeed
 }
 
 impl Destination {
@@ -49,9 +42,10 @@ static DEFAULT_DESTINATION_SPEED: DestinationSpeed = DestinationSpeed {
     rotation: DEFAULT_ROTATION_SPEED_VALUE,
 };
 
-
 impl Default for DestinationSpeed {
-    fn default() -> Self { DEFAULT_DESTINATION_SPEED }
+    fn default() -> Self {
+        DEFAULT_DESTINATION_SPEED
+    }
 }
 
 impl<'a> Default for &'a DestinationSpeed {
@@ -59,7 +53,6 @@ impl<'a> Default for &'a DestinationSpeed {
         &DEFAULT_DESTINATION_SPEED
     }
 }
-
 
 #[allow(clippy::type_complexity)]
 #[rustfmt::skip]
