@@ -34,6 +34,12 @@ impl Destination {
     }
 }
 
+impl Default for Destination {
+    fn default() -> Self {
+        Self::Reached
+    }
+}
+
 const DEFAULT_SPEED_VALUE: f32 = 6.0;
 const DEFAULT_ROTATION_SPEED_VALUE: f32 = 18.0;
 
