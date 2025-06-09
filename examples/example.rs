@@ -71,6 +71,7 @@ fn spawn_scene(
     commands.insert_resource(AmbientLight {
         color: Default::default(),
         brightness: 1000.0,
+        ..Default::default()
     });
 }
 
@@ -92,7 +93,7 @@ fn set_next_destination(
 
                 *destination = Destination::new(transform.translation, next_destination);
 
-                let mut marker_transform = destination_marker.single_mut();
+                let mut marker_transform = destination_marker.single_mut().unwrap();
                 marker_transform.translation = next_destination;
             }
         }
